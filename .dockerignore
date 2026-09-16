@@ -1,0 +1,11 @@
+.git
+.idea
+__pycache__
+*.py[cod]
+.pytest_cache
+mlruns
+mlartifacts
+services/airflow/logs
+data/raw
+data/processed
+PMLDL Assignment 1_ Deployment.md
