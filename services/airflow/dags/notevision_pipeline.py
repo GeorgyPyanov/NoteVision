@@ -28,13 +28,9 @@ def _timestamped(message: str) -> None:
     logging.info("[%s] %s", datetime.now().astimezone().isoformat(), message)
 
 
-def validate_task() -> None:
-    _timestamped("Starting raw data validation")
-    _timestamped(f"Validation result: {validate_raw_data(PROJECT_ROOT / 'data' / 'raw')}")
-
-
 def preprocess_task() -> None:
-    _timestamped("Starting image preprocessing")
+    _timestamped("Starting raw data validation and image preprocessing")
+    _timestamped(f"Validation result: {validate_raw_data(PROJECT_ROOT / 'data' / 'raw')}")
     _timestamped(f"Preprocessing result: {run_preprocessing(PROJECT_ROOT / 'data' / 'raw', PROJECT_ROOT / 'data' / 'processed')}")
 
 
@@ -76,15 +72,14 @@ with DAG(
     dag_id="notevision_pipeline",
     description="Clean notes, train HOG classifier, deploy and verify API",
     start_date=datetime(2025, 1, 1),
-    schedule="*/15 * * * *",
+    schedule="*/5 * * * *",
     catchup=False,
     max_active_runs=1,
     default_args={"owner": "notevision", "retries": 0},
     tags=["notevision", "mlops"],
 ) as dag:
-    validate_raw_data_task = PythonOperator(task_id="validate_raw_data", python_callable=validate_task)
-    preprocess_images = PythonOperator(task_id="preprocess_images", python_callable=preprocess_task)
-    train_model_task = PythonOperator(task_id="train_and_evaluate", python_callable=train_task)
+    preprocess_data = PythonOperator(task_id="preprocess_data", python_callable=preprocess_task)
+    train_model = PythonOperator(task_id="train_model", python_callable=train_task)
     deploy_services = PythonOperator(task_id="deploy_services", python_callable=deploy_services_task)
-    check_api_health = PythonOperator(task_id="check_api_health", python_callable=check_api_health_task)
-    validate_raw_data_task >> preprocess_images >> train_model_task >> deploy_services >> check_api_health
+    healthcheck = PythonOperator(task_id="healthcheck", python_callable=check_api_health_task)
+    preprocess_data >> train_model >> deploy_services >> healthcheck

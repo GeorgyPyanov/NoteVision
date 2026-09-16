@@ -59,16 +59,16 @@ The model is multinomial `LogisticRegression` over 64×64 HOG features (`9` orie
 
 ### Metrics
 
-The real run on the cleaned 3,929/983 train/test split produced:
+The current saved run uses the cleaned 3,996/999 train/test split and produced:
 
 | Metric | Value |
 | --- | ---: |
-| Accuracy | 0.981689 |
-| Macro F1 | 0.981982 |
-| Macro precision | 0.982024 |
-| Macro recall | 0.981975 |
-| Training time | 0.899 s |
-| One-image inference | 0.295 ms |
+| Accuracy | 0.982982982982983 |
+| Macro F1 | 0.9829748306215859 |
+| Macro precision | 0.9829796994924873 |
+| Macro recall | 0.9829748743718593 |
+| Training time | 7.38 s |
+| One-image inference | 0.613 ms |
 
 The machine-readable source of truth is `models/metrics.json`; timings naturally vary with CPU load.
 
@@ -149,11 +149,10 @@ docker compose -f services/airflow/docker-compose.yml down
 
 The `notevision_pipeline` DAG uses `*/5 * * * *`, `catchup=False`, and `max_active_runs=1`. It fails fast and only executes the next stage after a successful predecessor:
 
-1. `validate_raw_data`
-2. `preprocess_images`
-3. `train_and_evaluate`
-4. `deploy_services` (real `docker compose up -d --build`)
-5. `check_api_health` (real HTTP `GET /health`)
+1. `preprocess_data` (validates raw images, cleans data, handles outliers, and writes the split)
+2. `train_model` (HOG feature engineering, training, evaluation, and model packaging)
+3. `deploy_services` (real `docker compose up -d --build`)
+4. `healthcheck` (real HTTP `GET /health`)
 
 Run Airflow after Docker Desktop is running:
 
@@ -166,7 +165,7 @@ Open http://localhost:8080, enable `notevision_pipeline`, and trigger it with **
 ## Tests and checks
 
 ```powershell
-python -m compileall code services tests
+python -m compileall -q code services tests
 pytest -q
 docker compose -f code/deployment/docker-compose.yml config
 docker compose -f code/deployment/docker-compose.yml up --build -d
@@ -196,4 +195,4 @@ airflow dags test notevision_pipeline 2026-09-16
 2. Run `python code/models/train.py`, show metrics, confusion matrix, local `mlruns/`, and `model.joblib`.
 3. Start Compose and show `docker compose ... ps` proving `notevision-api` and `notevision-app` are separate containers.
 4. Open `/docs`, upload an image through Streamlit, and compare its result with the API `/predict` response.
-5. Trigger `notevision_pipeline` in Airflow and show its five successful, ordered task logs and five-minute schedule.
+5. Trigger `notevision_pipeline` in Airflow and show its four successful, ordered task logs and five-minute schedule.

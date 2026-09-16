@@ -60,12 +60,12 @@ def test_dag_import_and_regression_contract(monkeypatch):
     module = _load_dag_module()
     dag = module.dag
     assert callable(module.run_training)
-    assert module.train_model_task.python_callable is module.train_task
+    assert module.train_model.python_callable is module.train_task
     assert "train_and_evaluate" not in module.__dict__  # operator must never shadow imported callable
-    assert dag.schedule_interval == "*/15 * * * *"
+    assert dag.schedule_interval == "*/5 * * * *"
     assert dag.catchup is False
     assert dag.max_active_runs == 1
-    expected = ["validate_raw_data", "preprocess_images", "train_and_evaluate", "deploy_services", "check_api_health"]
+    expected = ["preprocess_data", "train_model", "deploy_services", "healthcheck"]
     assert list(dag.task_ids) == expected
     for upstream, downstream in zip(expected, expected[1:]):
         assert dag.get_task(downstream).upstream_task_ids == {upstream}
