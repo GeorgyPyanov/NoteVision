@@ -121,6 +121,10 @@ curl http://localhost:8000/health
 
 The Streamlit container receives `API_URL=http://api:8000`; it never loads a model and communicates only over the Docker network with FastAPI.
 
+### Streamlit interface
+
+![NoteVision Streamlit interface](docs/notevision-ui.png)
+
 | Service | Address |
 | --- | --- |
 | FastAPI health/API | http://localhost:8000/health |
