@@ -1,0 +1,18 @@
+services:
+  airflow:
+    build:
+      context: ../..
+      dockerfile: services/airflow/Dockerfile
+    container_name: notevision-airflow
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      NOTEVISION_ROOT: /opt/airflow/notevision
+      NOTE_VISION_HEALTH_URL: http://host.docker.internal:8000/health
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../..:/opt/airflow/notevision
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /opt/airflow
+    command: standalone
