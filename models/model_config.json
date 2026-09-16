@@ -1,0 +1,33 @@
+{
+  "model_version": "20260916T203508Z",
+  "class_names": [
+    "whole_note",
+    "half_note",
+    "quarter_note",
+    "eighth_note",
+    "sixteenth_note"
+  ],
+  "class_display_names": {
+    "whole_note": "Whole Note",
+    "half_note": "Half Note",
+    "quarter_note": "Quarter Note",
+    "eighth_note": "Eighth Note",
+    "sixteenth_note": "Sixteenth Note"
+  },
+  "image_size": 64,
+  "normalization": "pixel / 255.0",
+  "hog_params": {
+    "orientations": 9,
+    "pixels_per_cell": [
+      8,
+      8
+    ],
+    "cells_per_block": [
+      2,
+      2
+    ],
+    "block_norm": "L2-Hys"
+  },
+  "random_state": 42,
+  "class_weight": null
+}
