@@ -1,3 +1,5 @@
+name: notevision-airflow
+
 services:
   airflow:
     build:
@@ -6,13 +8,20 @@ services:
     container_name: notevision-airflow
     environment:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/notevision/services/airflow/dags
       NOTEVISION_ROOT: /opt/airflow/notevision
       NOTE_VISION_HEALTH_URL: http://host.docker.internal:8000/health
+      MLFLOW_TRACKING_URI: file:///opt/airflow/notevision/mlruns
     ports:
       - "8080:8080"
     volumes:
       - ../..:/opt/airflow/notevision
       - /var/run/docker.sock:/var/run/docker.sock
+    # Docker Desktop uses group 0; on Linux/WSL pass DOCKER_GID=$(stat -c '%g' /var/run/docker.sock).
+    group_add:
+      - "${DOCKER_GID:-0}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     working_dir: /opt/airflow
     command: standalone

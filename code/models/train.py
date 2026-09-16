@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 import time
 from datetime import datetime, timezone
@@ -114,7 +115,10 @@ def train_and_evaluate(processed_dir: Path = PROCESSED_DIR, models_dir: Path = M
     figure.savefig(matrix_path, dpi=160)
     plt.close(figure)
 
-    mlflow.set_tracking_uri(MLRUNS_DIR.as_uri())
+    # Airflow runs Linux containers while the project may be mounted from Windows;
+    # a Windows Path.as_uri() is not a valid Linux file URI. The compose service
+    # supplies a POSIX URI, while local runs retain the repository default.
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", MLRUNS_DIR.as_uri()))
     mlflow.set_experiment("notevision")
     with mlflow.start_run(run_name=f"hog-logreg-{config['model_version']}"):
         mlflow.log_params({"classifier": "LogisticRegression", "class_weight": str(class_weight),

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import json
 import os
 import subprocess
 import sys
@@ -18,7 +19,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from code.datasets.preprocess import run_preprocessing, validate_raw_data  # noqa: E402
-from code.models.train import train_and_evaluate  # noqa: E402
+from code.models.train import train_and_evaluate as run_training  # noqa: E402
 
 COMPOSE_FILE = PROJECT_ROOT / "code" / "deployment" / "docker-compose.yml"
 
@@ -39,12 +40,16 @@ def preprocess_task() -> None:
 
 def train_task() -> None:
     _timestamped("Starting model training and evaluation")
-    _timestamped(f"Training result: {train_and_evaluate(PROJECT_ROOT / 'data' / 'processed', PROJECT_ROOT / 'models')}")
+    _timestamped(f"Training result: {run_training(PROJECT_ROOT / 'data' / 'processed', PROJECT_ROOT / 'models')}")
 
 
 def deploy_services_task() -> None:
     _timestamped("Building/restarting FastAPI and Streamlit through Docker Compose")
-    subprocess.run(["docker", "compose", "-f", str(COMPOSE_FILE), "up", "-d", "--build", "--remove-orphans"],
+    # Fail before a slow build if socket mount/permissions are not usable.
+    for command in (["docker", "version"], ["docker", "compose", "version"], ["docker", "info"]):
+        subprocess.run(command, check=True)
+    subprocess.run(["docker", "compose", "--project-name", "notevision", "-f", str(COMPOSE_FILE),
+                    "up", "-d", "--build", "--remove-orphans"],
                    cwd=PROJECT_ROOT, check=True)
 
 
@@ -56,7 +61,9 @@ def check_api_health_task() -> None:
         try:
             response = requests.get(api_url, timeout=5)
             response.raise_for_status()
-            if response.json().get("status") == "ok":
+            expected_version = json.loads((PROJECT_ROOT / "models" / "model_config.json").read_text(encoding="utf-8"))["model_version"]
+            payload = response.json()
+            if payload.get("status") == "ok" and payload.get("model_version") == expected_version:
                 _timestamped("API healthcheck passed")
                 return
         except requests.RequestException as exc:
@@ -69,7 +76,7 @@ with DAG(
     dag_id="notevision_pipeline",
     description="Clean notes, train HOG classifier, deploy and verify API",
     start_date=datetime(2025, 1, 1),
-    schedule="*/5 * * * *",
+    schedule="*/15 * * * *",
     catchup=False,
     max_active_runs=1,
     default_args={"owner": "notevision", "retries": 0},
@@ -77,7 +84,7 @@ with DAG(
 ) as dag:
     validate_raw_data_task = PythonOperator(task_id="validate_raw_data", python_callable=validate_task)
     preprocess_images = PythonOperator(task_id="preprocess_images", python_callable=preprocess_task)
-    train_and_evaluate = PythonOperator(task_id="train_and_evaluate", python_callable=train_task)
+    train_model_task = PythonOperator(task_id="train_and_evaluate", python_callable=train_task)
     deploy_services = PythonOperator(task_id="deploy_services", python_callable=deploy_services_task)
     check_api_health = PythonOperator(task_id="check_api_health", python_callable=check_api_health_task)
-    validate_raw_data_task >> preprocess_images >> train_and_evaluate >> deploy_services >> check_api_health
+    validate_raw_data_task >> preprocess_images >> train_model_task >> deploy_services >> check_api_health

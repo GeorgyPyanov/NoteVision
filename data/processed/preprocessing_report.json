@@ -1,15 +1,15 @@
 {
-  "found": 4917,
+  "found": 5000,
   "outliers": 5,
-  "saved": 4912,
-  "train": 3929,
-  "test": 983,
+  "saved": 4995,
+  "train": 3996,
+  "test": 999,
   "per_class": {
     "eighth_note": 996,
     "half_note": 1000,
     "quarter_note": 1000,
     "sixteenth_note": 999,
-    "whole_note": 917
+    "whole_note": 1000
   },
   "random_state": 42,
   "preprocessing": {
