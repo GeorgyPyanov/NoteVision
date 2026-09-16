@@ -1,0 +1,21 @@
+{
+  "found": 4917,
+  "outliers": 5,
+  "saved": 4912,
+  "train": 3929,
+  "test": 983,
+  "per_class": {
+    "eighth_note": 996,
+    "half_note": 1000,
+    "quarter_note": 1000,
+    "sixteenth_note": 999,
+    "whole_note": 917
+  },
+  "random_state": 42,
+  "preprocessing": {
+    "image_size": 64,
+    "grayscale": true,
+    "crop_threshold": 245,
+    "normalization": "pixel / 255.0"
+  }
+}
