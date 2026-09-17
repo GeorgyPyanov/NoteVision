@@ -1,0 +1,1 @@
+"""NoteVision application package."""

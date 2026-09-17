@@ -1,0 +1,31 @@
+# Local/editor files
+.idea/
+.vscode/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+
+# Secrets and local data
+.env
+.env.*
+!.env.example
+kaggle.json
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/processed/train.csv
+!data/processed/test.csv
+!data/processed/preprocessing_report.json
+
+# Generated ML and orchestration artifacts
+models/logs/
+mlruns/
+mlartifacts/
+services/airflow/logs/
+services/airflow/airflow.db
+services/airflow/.env
+
+# Docker/runtime
+*.log

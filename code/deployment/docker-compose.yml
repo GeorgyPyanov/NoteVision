@@ -1,0 +1,35 @@
+name: notevision
+
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: code/deployment/api/Dockerfile
+    container_name: notevision-api
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks: [notevision]
+
+  app:
+    build:
+      context: ../..
+      dockerfile: code/deployment/app/Dockerfile
+    container_name: notevision-app
+    environment:
+      API_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [notevision]
+
+networks:
+  notevision:
+    driver: bridge

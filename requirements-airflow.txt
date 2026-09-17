@@ -1,0 +1,4 @@
+# Install Airflow first with its official constraints. Install requirements.txt separately;
+# Apache Airflow explicitly recommends constraints only for its own installation step.
+-c https://raw.githubusercontent.com/apache/airflow/constraints-2.10.4/constraints-3.11.txt
+apache-airflow==2.10.4
