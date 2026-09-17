@@ -40,7 +40,7 @@ def train_task() -> None:
 
 
 def deploy_services_task() -> None:
-    _timestamped("Building/restarting FastAPI and Streamlit through Docker Compose")
+    _timestamped("Building/restarting FastAPI and Streamlit with the freshly trained model")
     # Fail before a slow build if socket mount/permissions are not usable.
     for command in (["docker", "version"], ["docker", "compose", "version"], ["docker", "info"]):
         subprocess.run(command, check=True)

@@ -13,6 +13,7 @@ services:
       NOTEVISION_ROOT: /opt/airflow/notevision
       NOTE_VISION_HEALTH_URL: http://host.docker.internal:8000/health
       MLFLOW_TRACKING_URI: file:///opt/airflow/notevision/mlruns
+      MLFLOW_EXPERIMENT_NAME: notevision-airflow
     ports:
       - "8080:8080"
     volumes:

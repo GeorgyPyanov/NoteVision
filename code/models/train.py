@@ -119,7 +119,10 @@ def train_and_evaluate(processed_dir: Path = PROCESSED_DIR, models_dir: Path = M
     # a Windows Path.as_uri() is not a valid Linux file URI. The compose service
     # supplies a POSIX URI, while local runs retain the repository default.
     mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", MLRUNS_DIR.as_uri()))
-    mlflow.set_experiment("notevision")
+    # A file-backed MLflow experiment stores an absolute artifact path.  Keep
+    # the local default for developer runs, while allowing a Linux container
+    # that shares the repository with Windows to use its own POSIX experiment.
+    mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "notevision"))
     with mlflow.start_run(run_name=f"hog-logreg-{config['model_version']}"):
         mlflow.log_params({"classifier": "LogisticRegression", "class_weight": str(class_weight),
                            "random_state": RANDOM_STATE, "image_size": IMAGE_SIZE,
