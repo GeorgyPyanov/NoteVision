@@ -68,7 +68,7 @@ The current saved run uses the cleaned 3,996/999 train/test split and produced:
 | Macro precision | 0.9829796994924873 |
 | Macro recall | 0.9829748743718593 |
 | Training time | 9.30 s |
-| One-image inference | 0.613 ms |
+| One-image inference | 1.028 ms |
 
 The machine-readable source of truth is `models/metrics.json`; timings naturally vary with CPU load.
 
